@@ -13,13 +13,13 @@ from utils import batchify, get_batch, repackage_hidden
 parser = argparse.ArgumentParser(description='PyTorch PennTreeBank RNN/LSTM Language Model')
 parser.add_argument('--data', type=str, default='data/penn/',
                     help='location of the data corpus')
-parser.add_argument('--model', type=str, default='GRU',
+parser.add_argument('--model', type=str, default='LSTM',
                     help='type of recurrent net (LSTM, QRNN, GRU)')
-parser.add_argument('--emsize', type=int, default=50,
+parser.add_argument('--emsize', type=int, default=400,
                     help='size of word embeddings')
-parser.add_argument('--nhid', type=int, default=200,
+parser.add_argument('--nhid', type=int, default=1150,
                     help='number of hidden units per layer')
-parser.add_argument('--nlayers', type=int, default=1,
+parser.add_argument('--nlayers', type=int, default=3,
                     help='number of layers')
 parser.add_argument('--lr', type=float, default=30,
                     help='initial learning rate')
