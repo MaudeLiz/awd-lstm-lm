@@ -33,7 +33,6 @@ class SplitCrossEntropyLoss(nn.Module):
             if self.nsplits > 1:
                 head_weight = self.tail_vectors if head_weight is None else torch.cat([head_weight, self.tail_vectors])
                 head_bias = self.tail_bias if head_bias is None else torch.cat([head_bias, self.tail_bias])
-
             # Perform the softmax calculation for the word vectors in the head for all splits
             # We need to guard against empty splits as torch.cat does not like random lists
             head_res = torch.nn.functional.linear(hiddens, head_weight, bias=head_bias)

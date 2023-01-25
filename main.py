@@ -148,7 +148,6 @@ params = list(model.parameters()) + list(criterion.parameters())
 total_params = sum(x.size()[0] * x.size()[1] if len(x.size()) > 1 else x.size()[0] for x in params if x.size())
 print('Args:', args)
 print('Model total parameters:', total_params)
-
 ###############################################################################
 # Training code
 ###############################################################################
@@ -165,6 +164,7 @@ def evaluate(data_source, batch_size=10):
         output, hidden = model(data, hidden)
         total_loss += len(data) * criterion(model.decoder.weight, model.decoder.bias, output, targets).data
         hidden = repackage_hidden(hidden)
+        letter_count += len(data)
     return total_loss.item() / len(data_source)
 
 
@@ -187,15 +187,16 @@ def train():
         optimizer.param_groups[0]['lr'] = lr2 * seq_len / args.bptt
         model.train()
         data, targets = get_batch(train_data, i, args, seq_len=seq_len)
-
         # Starting each batch, we detach the hidden state from how it was previously produced.
         # If we didn't, the model would try backpropagating all the way to start of the dataset.
         hidden = repackage_hidden(hidden)
         optimizer.zero_grad()
-
+       # print("data", data.shape)
         output, hidden, rnn_hs, dropped_rnn_hs = model(data, hidden, return_h=True)
+       # print("output",output.shape)
+       # print("decoder weight", model.decoder.weight.shape) 
         raw_loss = criterion(model.decoder.weight, model.decoder.bias, output, targets)
-
+        #print("raw_loss", raw_loss)
         loss = raw_loss
         # Activiation Regularization
         if args.alpha: loss = loss + sum(args.alpha * dropped_rnn_h.pow(2).mean() for dropped_rnn_h in dropped_rnn_hs[-1:])
@@ -205,8 +206,7 @@ def train():
 
         # `clip_grad_norm` helps prevent the exploding gradient problem in RNNs / LSTMs.
         if args.clip: torch.nn.utils.clip_grad_norm_(params, args.clip)
-        optimizer.step()
-
+        optimizer.step() 
         total_loss += raw_loss.data
         optimizer.param_groups[0]['lr'] = lr2
         if batch % args.log_interval == 0 and batch > 0:
@@ -237,7 +237,6 @@ try:
         optimizer = torch.optim.Adam(params, lr=args.lr, weight_decay=args.wdecay)
     for epoch in range(1, args.epochs+1):
         epoch_start_time = time.time()
-        train()
         if 't0' in optimizer.param_groups[0]:
             tmp = {}
             for prm in model.parameters():
